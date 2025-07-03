@@ -1,0 +1,59 @@
+---
+
+## 📦 *TASK 3: Customer Churn Prediction*
+Dataset: https://www.kaggle.com/datasets/shantanudhakadd/bank-customer-churn-prediction
+
+### task3_customer_churn_prediction.py
+```python
+# task3_customer_churn_prediction.py
+# Customer Churn Prediction using Logistic Regression & Random Forest
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+
+# Step 1: Load dataset
+df = pd.read_csv('Churn_Modelling.csv')
+
+print("Data loaded. First few rows:")
+print(df.head())
+
+# Step 2: Drop unused columns
+df = df.drop(['RowNumber', 'CustomerId', 'Surname'], axis=1)
+
+# Step 3: Encode categorical data
+df['Gender'] = LabelEncoder().fit_transform(df['Gender'])
+df['Geography'] = LabelEncoder().fit_transform(df['Geography'])
+
+# Step 4: Feature scaling
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(df.drop('Exited', axis=1))
+X = pd.DataFrame(scaled_features, columns=df.drop('Exited', axis=1).columns)
+y = df['Exited']
+
+# Step 5: Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Step 6: Logistic Regression
+lr = LogisticRegression(max_iter=1000)
+lr.fit(X_train, y_train)
+y_pred_lr = lr.predict(X_test)
+
+print("\n=== Logistic Regression ===")
+print(classification_report(y_test, y_pred_lr))
+print(f"Accuracy: {accuracy_score(y_test, y_pred_lr):.4f}")
+
+# Step 7: Random Forest
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+y_pred_rf = rf.predict(X_test)
+
+print("\n=== Random Forest ===")
+print(classification_report(y_test, y_pred_rf))
+print(f"Accuracy: {accuracy_score(y_test, y_pred_rf):.4f}")
+
+print("\nDone! ✅")
